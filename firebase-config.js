@@ -1,5 +1,6 @@
-// 貼入 Firebase Console → 專案設定 → 你的應用程式 → 網頁應用程式的設定。
-// 此為瀏覽器設定；切勿放入服務帳戶私鑰。
 export const firebaseConfig = {
-  apiKey: "", authDomain: "", projectId: "", appId: ""
+  apiKey: "AIzaSyAOR2YTN9d6UWbmGt9YsNyaM-XJO50Fu54",
+  authDomain: "ordermanager1010.firebaseapp.com",
+  projectId: "ordermanager1010",
+  appId: "1:552786181047:web:946474f26eaad317348632"
 };
