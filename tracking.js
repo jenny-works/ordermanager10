@@ -36,8 +36,12 @@ function panel(view) {
   $('crumb').hidden=view==='hub'; $('crumbTitle').textContent=view==='orders'?'訂單管理':'訂單追蹤'; window.scrollTo(0,0);
     }
 $('showOrders').onclick=()=>panel('orders'); $('showTracking').onclick=()=>panel('tracking'); $('backHub').onclick=()=>panel('hub');
-function notice(id,text) { $(id).textContent=text; }
-function fail(id,e) { notice(id,e.code==='permission-denied'?'沒有存取權限，請發布包含 stations 與 tracking 的新版 Firestore 規則。':'操作失敗：'+(e.message||e)); }
+function notice(id,text) {
+  $(id).textContent=text;
+  const m=$('message'); m.textContent=text; m.classList.add('show'); clearTimeout(notice.t);
+  if(!/^正在/.test(text)) notice.t=setTimeout(()=>m.classList.remove('show'),6000);
+}
+function fail(id,e) { console.error(e); notice(id,e.code==='permission-denied'?'沒有存取權限，請發布包含 stations 與 tracking 的新版 Firestore 規則。':'操作失敗：'+(e.message||e)); }
 function collection(name) { return api.collection(db,'users',user.uid,name); }
 function doc(name,id) { return api.doc(db,'users',user.uid,name,id); }
 function values(schema,form) { return Object.fromEntries(schema.map(([k])=>[k,form.elements[k].value.trim()])); }
@@ -90,13 +94,13 @@ function renderRecords() {
 }
 $('trackingSearch').oninput=renderRecords;$('trackingFilter').onchange=renderRecords;
 stationForm.onsubmit=async e=>{
-  e.preventDefault();if(!user)return;
+  e.preventDefault();if(!user||!api)return notice('stationMessage','尚未連上 Firebase 或未登入，請重新整理頁面後再試。');
   const d=values(stationSchema,stationForm);if(!d.name)return notice('stationMessage','請輸入集運站名稱。');
   $('saveStation').disabled=true;notice('stationMessage','正在儲存集運站…');
   try{if(stationEdit)await api.updateDoc(doc('stations',stationEdit),{...d,updatedAt:api.serverTimestamp()});else await api.addDoc(collection('stations'),{...d,createdAt:api.serverTimestamp(),updatedAt:api.serverTimestamp()});resetStation();notice('stationMessage','集運站已儲存。');}catch(e){fail('stationMessage',e);}finally{$('saveStation').disabled=false;}
 };
 trackingForm.onsubmit=async e=>{
-  e.preventDefault();if(!user)return;
+  e.preventDefault();if(!user||!api)return notice('trackingMessage','尚未連上 Firebase 或未登入，請重新整理頁面後再試。');
   const d=values(trackingSchema,trackingForm);d.amount=Number(d.amount);
   if(!d.website||!d.item||!d.orderNo||!d.orderDate||!Number.isFinite(d.amount)||d.amount<0)return notice('trackingMessage','請填寫必填欄位與有效金額。');
   if((d.shipDate&&d.shipDate<d.orderDate)||(d.arrivalDate&&d.arrivalDate<(d.shipDate||d.orderDate)))return notice('trackingMessage','請確認日期順序：下單日期、送貨日期、送達日期。');
