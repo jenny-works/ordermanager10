@@ -44,7 +44,8 @@ function notice(id,text) {
 function fail(id,e) { console.error(e); notice(id,e.code==='permission-denied'?'沒有存取權限，請發布包含 stations 與 tracking 的新版 Firestore 規則。':'操作失敗：'+(e.message||e)); }
 function collection(name) { return api.collection(db,'users',user.uid,name); }
 function doc(name,id) { return api.doc(db,'users',user.uid,name,id); }
-function values(schema,form) { return Object.fromEntries(schema.map(([k])=>[k,form.elements[k].value.trim()])); }
+function field(form,k) { return form.elements.namedItem?form.elements.namedItem(k):form.elements[k]; }
+function values(schema,form) { return Object.fromEntries(schema.map(([k])=>[k,field(form,k).value.trim()])); }
 function today() { return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10); }
 function resetTracking() { trackingEdit=null;trackingForm.reset();trackingForm.elements.orderDate.value=today();$('trackingTitle').textContent='新增追蹤訂單';stationOptions(''); }
 function resetStation() { stationEdit=null;stationForm.reset();$('saveStation').textContent='儲存集運站'; }
@@ -86,7 +87,7 @@ function renderRecords() {
     const tr=document.createElement('tr');
     for(const value of [r.status,r.website+' ／ '+r.item,r.orderNo,r.amount.toLocaleString('zh-TW')+' '+r.currency,r.orderDate,r.shipDate,r.arrivalDate,r.payment,(r.stationName||'直送')+' ／ '+(r.trackingNo||'')]){const td=tr.insertCell();td.textContent=value;}
     tr.cells[0].replaceChildren(Object.assign(document.createElement('span'),{className:'badge',textContent:r.status}));tr.cells[0].firstChild.dataset.s=r.status;
-    tr.insertCell().append(button('編輯',()=>{trackingEdit=r.id;stationOptions(r.stationId);for(const [k]of trackingSchema)trackingForm.elements[k].value=r[k]??'';stationDetail();$('trackingTitle').textContent='編輯追蹤訂單';trackingForm.scrollIntoView({behavior:'smooth'});}),button('刪除',async()=>{
+    tr.insertCell().append(button('編輯',()=>{trackingEdit=r.id;stationOptions(r.stationId);for(const [k]of trackingSchema)field(trackingForm,k).value=r[k]??'';stationDetail();$('trackingTitle').textContent='編輯追蹤訂單';trackingForm.scrollIntoView({behavior:'smooth'});}),button('刪除',async()=>{
       if(!confirm('確定刪除追蹤訂單 '+r.orderNo+'？'))return;
       try{await api.deleteDoc(doc('tracking',r.id));if(trackingEdit===r.id)resetTracking();}catch(e){fail('trackingMessage',e);}
     }));$('trackingRows').append(tr);
