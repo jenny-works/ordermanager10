@@ -31,12 +31,11 @@ function fields(schema, container) {
 fields(stationSchema,'stationFields'); fields(trackingSchema,'trackingFields');
 for (const s of statuses) $('trackingFilter').add(new Option(s,s));
 let user=null, db, api, stations=[], records=[], stationEdit=null, trackingEdit=null, stops=[];
-function panel(tracking) {
-  $('ordersPanel').hidden=tracking; $('trackingPanel').hidden=!tracking;
-  $('showOrders').setAttribute('aria-pressed',String(!tracking));
-  $('showTracking').setAttribute('aria-pressed',String(tracking));
-}
-$('showOrders').onclick=()=>panel(false); $('showTracking').onclick=()=>panel(true);
+function panel(view) {
+  for(const [id,name] of [['hub','hub'],['ordersPanel','orders'],['trackingPanel','tracking']]) $(id).hidden=view!==name;
+  $('crumb').hidden=view==='hub'; $('crumbTitle').textContent=view==='orders'?'訂單管理':'訂單追蹤'; window.scrollTo(0,0);
+    }
+$('showOrders').onclick=()=>panel('orders'); $('showTracking').onclick=()=>panel('tracking'); $('backHub').onclick=()=>panel('hub');
 function notice(id,text) { $(id).textContent=text; }
 function fail(id,e) { notice(id,e.code==='permission-denied'?'沒有存取權限，請發布包含 stations 與 tracking 的新版 Firestore 規則。':'操作失敗：'+(e.message||e)); }
 function collection(name) { return api.collection(db,'users',user.uid,name); }
@@ -77,10 +76,12 @@ function renderStations() {
 function renderRecords() {
   const query=$('trackingSearch').value.toLowerCase(),status=$('trackingFilter').value;
   const list=records.filter(r=>(!status||r.status===status)&&[r.website,r.item,r.orderNo,r.stationName,r.trackingNo].some(v=>String(v||'').toLowerCase().includes(query)));
+  $('hubTracking').textContent=records.length+' 筆追蹤 · '+records.filter(r=>!['已送達','已取消'].includes(r.status)).length+' 筆進行中';
   $('trackingRows').replaceChildren();$('trackingEmpty').hidden=!!list.length;
   for(const r of list){
     const tr=document.createElement('tr');
     for(const value of [r.status,r.website+' ／ '+r.item,r.orderNo,r.amount.toLocaleString('zh-TW')+' '+r.currency,r.orderDate,r.shipDate,r.arrivalDate,r.payment,(r.stationName||'直送')+' ／ '+(r.trackingNo||'')]){const td=tr.insertCell();td.textContent=value;}
+    tr.cells[0].replaceChildren(Object.assign(document.createElement('span'),{className:'badge',textContent:r.status}));tr.cells[0].firstChild.dataset.s=r.status;
     tr.insertCell().append(button('編輯',()=>{trackingEdit=r.id;stationOptions(r.stationId);for(const [k]of trackingSchema)trackingForm.elements[k].value=r[k]??'';stationDetail();$('trackingTitle').textContent='編輯追蹤訂單';trackingForm.scrollIntoView({behavior:'smooth'});}),button('刪除',async()=>{
       if(!confirm('確定刪除追蹤訂單 '+r.orderNo+'？'))return;
       try{await api.deleteDoc(doc('tracking',r.id));if(trackingEdit===r.id)resetTracking();}catch(e){fail('trackingMessage',e);}
@@ -111,7 +112,7 @@ async function start(){
     const [app,auth,firestore]=await Promise.all([import('https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js'),import('https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js'),import('https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js')]);
     api=firestore;const instance=app.getApps().length?app.getApp():app.initializeApp(firebaseConfig);db=api.getFirestore(instance);
     auth.onAuthStateChanged(auth.getAuth(instance),u=>{
-      stops.forEach(stop=>stop());stops=[];user=u;stations=[];records=[];resetStation();resetTracking();renderStations();renderRecords();panel(false);
+      stops.forEach(stop=>stop());stops=[];user=u;stations=[];records=[];resetStation();resetTracking();renderStations();renderRecords();panel('hub');
       if(!u){notice('stationMessage','請先登入。');notice('trackingMessage','請先登入。');return;}
       notice('stationMessage','正在載入集運站…');notice('trackingMessage','正在載入追蹤訂單…');
       stops.push(api.onSnapshot(api.query(collection('stations'),api.orderBy('createdAt','desc')),s=>{stations=s.docs.map(d=>({...d.data(),id:d.id}));renderStations();notice('stationMessage','已同步 '+stations.length+' 個集運站。');},e=>fail('stationMessage',e)));
