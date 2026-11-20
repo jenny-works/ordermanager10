@@ -87,6 +87,7 @@ function renderRecords() {
     const tr=document.createElement('tr');
     for(const value of [r.status,r.website+' ／ '+r.item,r.orderNo,r.amount.toLocaleString('zh-TW')+' '+r.currency,r.orderDate,r.shipDate,r.arrivalDate,r.payment,(r.stationName||'直送')+' ／ '+(r.trackingNo||'')]){const td=tr.insertCell();td.textContent=value;}
     tr.cells[0].replaceChildren(Object.assign(document.createElement('span'),{className:'badge',textContent:r.status}));tr.cells[0].firstChild.dataset.s=r.status;
+    if(r.payment==='貨到付款')tr.cells[7].replaceChildren(Object.assign(document.createElement('span'),{className:'badge pay-cod',textContent:r.payment}));
     tr.insertCell().append(button('編輯',()=>{trackingEdit=r.id;stationOptions(r.stationId);for(const [k]of trackingSchema)field(trackingForm,k).value=r[k]??'';stationDetail();$('trackingTitle').textContent='編輯追蹤訂單';trackingForm.scrollIntoView({behavior:'smooth'});}),button('刪除',async()=>{
       if(!confirm('確定刪除追蹤訂單 '+r.orderNo+'？'))return;
       try{await api.deleteDoc(doc('tracking',r.id));if(trackingEdit===r.id)resetTracking();}catch(e){fail('trackingMessage',e);}
