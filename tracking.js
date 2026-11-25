@@ -32,10 +32,13 @@ fields(stationSchema,'stationFields'); fields(trackingSchema,'trackingFields');
 for (const s of statuses) $('trackingFilter').add(new Option(s,s));
 let user=null, db, api, stations=[], records=[], stationEdit=null, trackingEdit=null, stops=[];
 function panel(view) {
-  for(const [id,name] of [['hub','hub'],['ordersPanel','orders'],['trackingPanel','tracking']]) $(id).hidden=view!==name;
-  $('crumb').hidden=view==='hub'; $('crumbTitle').textContent=view==='orders'?'訂單管理':'訂單追蹤'; window.scrollTo(0,0);
-    }
-$('showOrders').onclick=()=>panel('orders'); $('showTracking').onclick=()=>panel('tracking'); $('backHub').onclick=()=>panel('hub');
+  for(const [id,name] of [['hub','hub'],['ordersPanel','orders'],['trackingPanel','tracking'],['stationsPanel','stations']]) $(id).hidden=view!==name;
+  $('crumb').hidden=view==='hub';
+  $('crumbTitle').textContent={orders:'訂單管理',tracking:'訂單追蹤',stations:'集運站管理'}[view]||'';
+  $('backHub').hidden=view==='stations'; $('backTracking').hidden=view!=='stations';
+  window.scrollTo(0,0);
+}
+$('showOrders').onclick=()=>panel('orders'); $('showTracking').onclick=()=>panel('tracking'); $('backHub').onclick=()=>panel('hub'); $('openStations').onclick=()=>panel('stations'); $('backTracking').onclick=()=>panel('tracking');
 function notice(id,text) {
   $(id).textContent=text;
   const m=$('message'); m.textContent=text; m.classList.add('show'); clearTimeout(notice.t);
