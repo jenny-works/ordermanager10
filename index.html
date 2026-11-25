@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>訂單管理</title>
-  <link rel="stylesheet" href="style.css?v=20261120-ui4">
+  <link rel="stylesheet" href="style.css?v=20261125-ui5">
 </head>
 <body>
 
@@ -73,6 +73,7 @@
     <!-- 模組內頁共用返回列 -->
     <div id="crumb" class="crumb" hidden>
       <button type="button" id="backHub" class="ghost">← 主選單</button>
+      <button type="button" id="backTracking" class="ghost" hidden>← 訂單追蹤</button>
       <span id="crumbTitle"></span>
     </div>
 
@@ -153,16 +154,6 @@
     <!-- 訂單追蹤 -->
     <div id="trackingPanel" hidden>
       <section>
-        <h2>集運站管理</h2>
-        <p>預先儲存集運站資訊，建立追蹤訂單時可直接選取。</p>
-        <p id="stationMessage" role="status">尚未載入集運站。</p>
-        <form id="stationForm">
-          <div id="stationFields" class="grid"></div>
-          <div class="actions"><button id="saveStation">儲存集運站</button><button type="button" id="cancelStation" class="ghost">清空／取消編輯</button></div>
-        </form>
-        <ul id="stationList"></ul>
-      </section>
-      <section>
         <h2 id="trackingTitle">新增追蹤訂單</h2>
         <p id="trackingMessage" role="status">尚未載入追蹤訂單。</p>
         <form id="trackingForm">
@@ -172,14 +163,27 @@
         </form>
       </section>
       <section>
-        <div class="toolbar"><h2>訂單追蹤一覽</h2><input id="trackingSearch" placeholder="搜尋網站、項目、訂單編號" aria-label="搜尋追蹤訂單"><select id="trackingFilter" aria-label="篩選訂單狀態"><option value="">全部狀態</option></select></div>
+        <div class="toolbar"><h2>訂單追蹤一覽</h2><button type="button" id="openStations" class="ghost">管理集運站</button><input id="trackingSearch" placeholder="搜尋網站、項目、訂單編號" aria-label="搜尋追蹤訂單"><select id="trackingFilter" aria-label="篩選訂單狀態"><option value="">全部狀態</option></select></div>
         <p id="trackingEmpty">目前沒有追蹤訂單。</p>
         <div class="tablewrap"><table><thead><tr><th>狀態</th><th>網站／項目</th><th>訂單編號</th><th>金額／幣別</th><th>下單日期</th><th>送貨日期</th><th>送達日期</th><th>支付方式</th><th>集運站／物流單號</th><th>操作</th></tr></thead><tbody id="trackingRows"></tbody></table></div>
       </section>
     </div>
+    <!-- 集運站管理（獨立頁面） -->
+    <div id="stationsPanel" hidden>
+      <section>
+        <h2>集運站管理</h2>
+        <p>預先儲存集運站資訊，建立追蹤訂單時可直接選取。</p>
+        <p id="stationMessage" role="status">尚未載入集運站。</p>
+        <form id="stationForm">
+          <div id="stationFields" class="grid"></div>
+          <div class="actions"><button id="saveStation">儲存集運站</button><button type="button" id="cancelStation" class="ghost">清空／取消編輯</button></div>
+        </form>
+        <ul id="stationList"></ul>
+      </section>
+    </div>
   </main>
 
-  <script type="module" src="app.js?v=20261120-ui4"></script>
-  <script type="module" src="tracking.js?v=20261120-ui4"></script>
+  <script type="module" src="app.js?v=20261125-ui5"></script>
+  <script type="module" src="tracking.js?v=20261125-ui5"></script>
 </body>
 </html>
