@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>訂單管理</title>
-  <link rel="stylesheet" href="style.css?v=20261125-ui5">
+  <link rel="stylesheet" href="style.css?v=20261125-ui6">
 </head>
 <body>
 
@@ -183,7 +183,24 @@
     </div>
   </main>
 
-  <script type="module" src="app.js?v=20261125-ui5"></script>
-  <script type="module" src="tracking.js?v=20261125-ui5"></script>
+  <!-- 集運站頁面切換（獨立於 tracking.js，確保按鈕一定有反應） -->
+  <script>
+  (function(){
+    var $=function(i){return document.getElementById(i)};
+    function go(view){
+      var map={hub:'hub',orders:'ordersPanel',tracking:'trackingPanel',stations:'stationsPanel'};
+      for(var k in map){var el=$(map[k]);if(el)el.hidden=(k!==view)}
+      $('crumb').hidden=(view==='hub');
+      $('crumbTitle').textContent={orders:'訂單管理',tracking:'訂單追蹤',stations:'集運站管理'}[view]||'';
+      $('backHub').hidden=(view==='stations');
+      $('backTracking').hidden=(view!=='stations');
+      window.scrollTo(0,0);
+    }
+    $('openStations').addEventListener('click',function(){go('stations')});
+    $('backTracking').addEventListener('click',function(){go('tracking')});
+  })();
+  </script>
+  <script type="module" src="app.js?v=20261125-ui6"></script>
+  <script type="module" src="tracking.js?v=20261125-ui6"></script>
 </body>
 </html>
