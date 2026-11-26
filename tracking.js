@@ -33,8 +33,15 @@ for (const s of statuses) $('trackingFilter').add(new Option(s,s));
 let user=null, db, api, stations=[], records=[], stationEdit=null, trackingEdit=null, stops=[];
 function panel(view) {
   for(const [id,name] of [['hub','hub'],['ordersPanel','orders'],['trackingPanel','tracking']]) $(id).hidden=view!==name;
-  $('crumb').hidden=view==='hub'; $('crumbTitle').textContent=view==='orders'?'訂單管理':'訂單追蹤'; window.scrollTo(0,0);
+  $('crumb').hidden=view==='hub'; $('crumbTitle').textContent=view==='orders'?'訂單管理':'訂單追蹤'; stationView(false); window.scrollTo(0,0);
     }
+function stationView(on) {
+  $('stationSection').hidden=!on;
+  for (const el of document.querySelectorAll('#trackingPanel .track-main')) el.hidden=on;
+  if ($('crumbTitle').textContent.startsWith('訂單追蹤')) $('crumbTitle').textContent=on?'訂單追蹤 › 集運站管理':'訂單追蹤';
+  window.scrollTo(0,0);
+}
+$('openStations').onclick=()=>stationView(true); $('closeStations').onclick=()=>stationView(false);
 $('showOrders').onclick=()=>panel('orders'); $('showTracking').onclick=()=>panel('tracking'); $('backHub').onclick=()=>panel('hub');
 function notice(id,text) {
   $(id).textContent=text;
@@ -76,6 +83,7 @@ function renderStations() {
       try{await api.deleteDoc(doc('stations',s.id));if(stationEdit===s.id)resetStation();}catch(e){fail('stationMessage',e);}
     })); $('stationList').append(li);
   }
+  $('openStations').textContent='管理集運站（'+stations.length+'）';
   stationOptions();
 }
 function renderRecords() {
